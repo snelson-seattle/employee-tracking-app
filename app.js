@@ -1,6 +1,8 @@
+// Package Imports
 const inquirer = require("inquirer");
 const mysql = require("mysql");
 
+// Set up database connection parameters
 const connection = mysql.createConnection({
     host: "localhost",
   
@@ -11,14 +13,16 @@ const connection = mysql.createConnection({
     user: "root",
   
     // Your password
-    password: "15104$c00t3R1980",
+    password: "password",
 
-    // Database to connect to
+    // Select database from server
     database: "crm_DB"
   });
 
+// Establish connection to MySQL database
 connection.connect(err => {
     if(err) throw err;
+    // Start application upon successful database connection
     begin();
 });
 
