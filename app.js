@@ -83,6 +83,7 @@ function addDepartment(){
     });
 }
 
+
 // Add new role to roles table
 async function addRole(){
     let id = await getDepartmentId(); 
@@ -97,23 +98,7 @@ async function addRole(){
     })
 }
 
-// Add new employee from employees table
-function addEmployee(){
-    console.log("You want to add an employee");
-}
-
-
-
-// Read data from departments table
-function getDepartmentsData(){
-    return new Promise((resolve, reject) => {
-        const query = "SELECT * FROM departments";
-        connection.query(query, (err,res) => {
-           return err ? reject(err) : resolve(res);
-        });
-    });
-}
-
+// Helper functions for addRole()
 async function getDepartmentId(){
     return new Promise(async (resolve, reject) => {
         // query database and wait for response before continuing on
@@ -165,6 +150,25 @@ async function getRoleSalary(){
 
     return parseFloat(output.salary);
 }
+
+// Add new employee from employees table
+function addEmployee(){
+    console.log("You want to add an employee");
+}
+
+
+
+// Read data from departments table
+function getDepartmentsData(){
+    return new Promise((resolve, reject) => {
+        const query = "SELECT * FROM departments";
+        connection.query(query, (err,res) => {
+           return err ? reject(err) : resolve(res);
+        });
+    });
+}
+
+
 
 
     
