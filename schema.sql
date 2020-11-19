@@ -6,7 +6,7 @@ USE crm_DB;
 
 CREATE TABLE departments (
     id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(30) NOT NULL,
+    dept_name VARCHAR(30) NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -18,8 +18,6 @@ CREATE TABLE roles (
     FOREIGN KEY (department_id) REFERENCES departments(id),
     PRIMARY KEY (id) 
 );
- 
-
 
 CREATE TABLE employees(
     id INT NOT NULL AUTO_INCREMENT,

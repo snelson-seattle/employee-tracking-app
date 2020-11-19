@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/snelson-seattle/employee-tracking-app#readme",
   "dependencies": {
+    "console.table": "^0.10.0",
     "inquirer": "^7.3.3",
     "mysql": "^2.18.1"
   }
