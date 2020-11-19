@@ -24,12 +24,38 @@ connection.connect(err => {
     if(err) throw err;
     // Start application upon successful database connection
     console.log("Connected to database successfully.");
-    begin();
+    mainMenu();
 });
 
+function mainMenu(){
+    inquirer.prompt([
+        {
+            type: "list",
+            name: "action",
+            message: "What would you like to do?",
+            choices: [
+                "Add Items to Database",
+                "View Database Items",
+                "Exit Program"
+            ] 
+        }
+    ]).then(function(answer){
+        switch(answer.action){
+            case "Add Items to Database":
+                databaseAdd();
+                break;
+            case "View Database Items":
+                addRole();
+                break;
+            case "Exit Program":
+                connection.end();
+                break;
+        }
+    });
+}
 
 
-function begin(){
+function databaseAdd(){
     
     inquirer.prompt([
         {
@@ -40,7 +66,7 @@ function begin(){
                 "Add Department",
                 "Add Role",
                 "Add Employee",
-                "Exit Program"
+                "Return to Main Menu"
             ]
         }
     ]).then(function(answer){
@@ -54,8 +80,8 @@ function begin(){
             case "Add Employee":
                 addEmployee();
                 break;
-            case "Exit Program":
-                connection.end();
+            case "Return to Main Menu":
+                mainMenu();
                 break;
         }
     });
@@ -78,11 +104,10 @@ function addDepartment(){
         connection.query(query, function(err, res){
             if(err) throw err;
             console.log("New department added successfully.");
-            begin();
+            databaseAdd();
         });
     });
 }
-
 
 // Add new role to roles table
 async function addRole(){
@@ -94,7 +119,7 @@ async function addRole(){
     connection.query(query, function(err, res){
         if(err) throw err;
         console.log("Successfully added new role.");
-        begin();
+        databaseAdd();
     })
 }
 
@@ -168,6 +193,25 @@ function getDepartmentsData(){
     });
 }
 
+// Read data from employees table
+function getEmployeesData(){
+    return new Promise((resolve, reject)=> {
+        const query = "SELECT * FROM employees";
+        connection.query(query, (err, res) => {
+            return err ? reject(err) : resolve(res);
+        });
+    });
+}
+
+// Read data from roles table
+function getRolesData(){
+    return new Promise((resolve, reject)=> {
+        const query = "SELECT * FROM roles";
+        connection.query(query, (err, res) => {
+            return err ? reject(err) : resolve(res);
+        });
+    });
+}
 
 
 
