@@ -123,7 +123,24 @@ async function addRole(){
     })
 }
 
-// Helper functions for addRole()
+
+
+// Add new employee from employees table
+async function addEmployee(){
+    let department_id = await getDepartmentId();
+    let first_name = await getFirstName();
+    let last_name = await getLastName();
+    let role_id = await getRoleId(department_id);
+
+    let query = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ("${first_name}", "${last_name}", ${role_id}, NULL)`;
+    connection.query(query, function(err, res){
+        if(err) throw err;
+        console.log("Employee added successfully.");
+        databaseAdd();
+    });
+}
+
+// Helper functions
 async function getDepartmentId(){
     return new Promise(async (resolve, reject) => {
         // query database and wait for response before continuing on
@@ -135,7 +152,7 @@ async function getDepartmentId(){
 
         let output = await inquirer.prompt([
             {
-                message: "Which department do you wish to add a role to?",
+                message: "To which department?",
                 type: "list",
                 name: "name",
                 choices: dept_names
@@ -144,9 +161,9 @@ async function getDepartmentId(){
 
         departments.forEach(item => {
             if(output.name == item.dept_name){
-                resolve(item.id);
+                resolve(parseInt(item.id));
             }else{
-                reject("ID not found");
+                reject("Department ID not found");
             }
         });
     });     
@@ -176,12 +193,59 @@ async function getRoleSalary(){
     return parseFloat(output.salary);
 }
 
-// Add new employee from employees table
-function addEmployee(){
-    console.log("You want to add an employee");
+async function getFirstName(){
+    let output = await inquirer.prompt([
+        {
+            message: "Enter the employee's first name: ",
+            type: "input",
+            name: "name"
+        }
+    ]);
+
+    return output.name;
 }
 
+async function getLastName(){
+    let output = await inquirer.prompt([
+        {
+            message: "Enter the employee's last name: ",
+            type: "input",
+            name: "name"
+        }
+    ]);
 
+    return output.name;
+}
+
+async function getRoleId(department_id){
+    return new Promise(async (resolve, reject) => {
+        let role_names = [];
+        let role_data = await getRolesData();
+        
+        role_data.forEach(item => {
+            if(item.department_id == department_id){
+                role_names.push(item.title);
+            }
+        });
+
+        let output = await inquirer.prompt([
+            {
+                message: "What is this employee's role?",
+                type: "list",
+                name: "role",
+                choices: role_names
+            }
+        ]);
+
+        role_data.forEach(item => {
+            if(output.role == item.title){
+                resolve(item.id);
+            }else{
+                reject("Role ID not found.");
+            }
+        });  
+    });
+}
 
 // Read data from departments table
 function getDepartmentsData(){
