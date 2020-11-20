@@ -111,11 +111,11 @@ function addDepartment(){
 
 // Add new role to roles table
 async function addRole(){
-    let id = await getDepartmentId(); 
+    let department_id = await getDepartmentId(); 
     let title = await getRoleTitle();
     let salary = await getRoleSalary();
 
-    let query = `INSERT INTO roles (title, salary, department_id) VALUE ("${title}", ${salary}, ${id})`;
+    let query = `INSERT INTO roles (title, salary, department_id) VALUE ("${title}", ${salary}, ${department_id})`;
     connection.query(query, function(err, res){
         if(err) throw err;
         console.log("Successfully added new role.");
@@ -128,16 +128,22 @@ async function addRole(){
 // Add new employee from employees table
 async function addEmployee(){
     let department_id = await getDepartmentId();
-    let first_name = await getFirstName();
-    let last_name = await getLastName();
     let role_id = await getRoleId(department_id);
-
-    let query = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ("${first_name}", "${last_name}", ${role_id}, NULL)`;
-    connection.query(query, function(err, res){
-        if(err) throw err;
-        console.log("Employee added successfully.");
+    if(role_id === null){
+        console.log("Error: No roles found for this department. Please add a role and try again.");
         databaseAdd();
-    });
+    }else{
+        let first_name = await getFirstName();
+        let last_name = await getLastName();
+   
+
+        let query = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ("${first_name}", "${last_name}", ${role_id}, NULL)`;
+        connection.query(query, function(err, res){
+            if(err) throw err;
+            console.log("Employee added successfully.");
+            databaseAdd();
+        });
+    }    
 }
 
 // Helper functions
@@ -146,6 +152,7 @@ async function getDepartmentId(){
         // query database and wait for response before continuing on
         let departments = await getDepartmentsData();
         let dept_names = [];
+        let dept_id;
         departments.forEach(item => {
             dept_names.push(item.dept_name);
         });
@@ -160,12 +167,16 @@ async function getDepartmentId(){
         ]);
 
         departments.forEach(item => {
-            if(output.name == item.dept_name){
-                resolve(parseInt(item.id));
-            }else{
-                reject("Department ID not found");
-            }
+            if(output.name === item.dept_name){
+                dept_id = item.id;
+            }           
         });
+
+        if(dept_id != null){
+            resolve(dept_id);
+        }
+
+        reject("Department ID not found.");
     });     
 }
 
@@ -221,29 +232,39 @@ async function getRoleId(department_id){
     return new Promise(async (resolve, reject) => {
         let role_names = [];
         let role_data = await getRolesData();
-        
+        let role_id;
+
         role_data.forEach(item => {
             if(item.department_id == department_id){
                 role_names.push(item.title);
             }
         });
-
-        let output = await inquirer.prompt([
-            {
-                message: "What is this employee's role?",
-                type: "list",
-                name: "role",
-                choices: role_names
+        
+        if(!(Array.isArray(role_names) && role_names.length)){
+            resolve(null);
+        }else{
+            let output = await inquirer.prompt([
+                {
+                    message: "What is this employee's role?",
+                    type: "list",
+                    name: "role",
+                    choices: role_names
+                }
+            ]);
+    
+            role_data.forEach(item => {
+                if(output.role == item.title){
+                    role_id = item.id;
+                }
+            }); 
+            
+            if(role_id != null){
+                resolve(role_id);
             }
-        ]);
-
-        role_data.forEach(item => {
-            if(output.role == item.title){
-                resolve(item.id);
-            }else{
-                reject("Role ID not found.");
-            }
-        });  
+    
+            reject("Role ID not found.");
+        }     
+        
     });
 }
 
