@@ -135,9 +135,9 @@ async function addEmployee(){
     }else{
         let first_name = await getFirstName();
         let last_name = await getLastName();
-   
+        let manager_id = await getManagerId();
 
-        let query = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ("${first_name}", "${last_name}", ${role_id}, NULL)`;
+        let query = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ("${first_name}", "${last_name}", ${role_id}, ${manager_id})`;
         connection.query(query, function(err, res){
             if(err) throw err;
             console.log("Employee added successfully.");
@@ -262,8 +262,47 @@ async function getRoleId(department_id){
                 resolve(role_id);
             }
     
-            reject("Role ID not found.");
+            reject("Error: Role ID not found.");
         }     
+        
+    });
+}
+
+async function getManagerId(){
+    return new Promise(async (resolve, reject) => {
+        let manager_id;
+        let employee_list = [];
+        let employee_data = await getEmployeesData();
+        employee_data.forEach(item => {
+            let first = item.first_name;
+            let last = item.last_name;
+            let full = first + " " + last;
+            employee_list.push(full);
+        });
+
+        let output = await inquirer.prompt([
+            {
+                message: "Who manages this employee?",
+                type: "list",
+                name: "manager",
+                choices: employee_list
+            }
+        ]);
+
+        output.manager = output.manager.split(" ");
+        output.manager = output.manager[0];
+
+        employee_data.forEach(item => {
+            if(output.manager == item.first_name){
+                manager_id = item.id;
+            }
+        });
+
+        if(manager_id != null){
+            resolve(manager_id);
+        }
+
+        reject("Error: Manager ID not found.");
         
     });
 }
